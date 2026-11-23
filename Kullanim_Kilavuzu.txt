@@ -1,0 +1,52 @@
+====================================================================
+   IMAP & CATCH-ALL DOĞRULAMA KODU OKUYUCU MODÜLÜ - KULLANIM KILAVUZU
+====================================================================
+
+1. GENEL BİLGİ VE GEREKSİNİMLER
+- Bu modül hiçbir harici Python kütüphanesi (pip install) gerektirmez; Python'ın kendi standart kütüphaneleri (imaplib, email, re) ile doğrudan çalışır.
+- Hem standart IMAP e-posta hesaplarında (Gmail, Yandex, kurumsal mail vb.) hem de Catch-All (tüm alt adresleri tek kutuda toplayan özel alan adı) sistemlerinde sorunsuz çalışır.
+
+2. PROJEYE ENTEGRASYON (ADIM ADIM)
+Adım 1 - Dosyayı Projenize Kopyalayın:
+- "email_okuyucu.py" dosyasını kendi ana Python projenizin bulunduğu klasörün içine kopyalayın.
+
+Adım 2 - Kodunuza Dahil Edin (Import) ve Çalıştırın:
+- Ana Python dosyanızın en üstüne şu satırı ekleyin:
+  from email_okuyucu import ImapKodOkuyucu
+
+- Ardından mail sunucu bilgilerinizle okuyucuyu başlatın ve kodu bekleyin:
+
+  okuyucu = ImapKodOkuyucu(
+      imap_sunucu="mail.alanadiniz.com",
+      kullanici_mail="catchall@alanadiniz.com",
+      sifre="MAIL_SIFRENIZ",
+      port=993
+  )
+
+  # Örnek 1: Catch-All sistemde belirli bir alt adrese gelen kodu yakalama
+  sonuc = okuyucu.dogrulama_kodu_bekle(
+      hedef_alici="kullanici1@alanadiniz.com",
+      bekleme_suresi=60,
+      kontrol_araligi=4
+  )
+
+  # Örnek 2: Standart tek e-posta kutusunda belirli bir gönderenden gelen kodu yakalama
+  # sonuc = okuyucu.dogrulama_kodu_bekle(gonderen_filtre="noreply@site.com", bekleme_suresi=60)
+
+  if sonuc["basarili"]:
+      print("Gelen Doğrulama Kodu:", sonuc["kod"])
+  else:
+      print("Hata:", sonuc["hata"])
+
+3. PARAMETRELERİN AÇIKLAMASI
+- imap_sunucu: E-posta sağlayıcınızın IMAP adresi (örn: imap.gmail.com veya mail.siteadi.com).
+- kullanici_mail & sifre: Ana posta kutusunun giriş bilgileri (Gmail kullanıyorsanız normal şifre yerine Google "Uygulama Şifresi" kullanmalısınız).
+- hedef_alici (İsteğe Bağlı): Catch-All sistemlerde hangi alt adrese gelen mailin okunacağını belirtir.
+- gonderen_filtre (İsteğe Bağlı): Sadece belirli bir siteden/gönderenden gelen mailleri taramak için kullanılır.
+- bekleme_suresi: Kodun gelmesi için beklenecek maksimum saniye (varsayılan: 60).
+- kontrol_araligi: Gelen kutusunun kaç saniyede bir kontrol edileceği (varsayılan: 4).
+
+4. ÖNEMLİ NOTLAR
+- Modül yalnızca "Okunmamış (UNSEEN)" mailleri tarar ve en yeni gelen mailden geriye doğru arama yaparak eski kodlarla karışmasını önler.
+- Güvenlik gereği e-posta şifrelerinizi doğrudan kod içine yazmak yerine ".env" dosyası üzerinden çekmeniz önerilir.
+====================================================================
